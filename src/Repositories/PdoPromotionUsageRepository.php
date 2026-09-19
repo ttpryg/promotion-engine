@@ -12,7 +12,7 @@ class PdoPromotionUsageRepository implements PromotionUsageRepositoryInterface
 
     public function recordUsage(PromotionUsage $usage): void
     {
-        $stmt = $this->pdo->prepare("INSERT INTO promotion_usages (id, promotion_id, user_id, cart_id, order_id, discount_amount, used_at) VALUES (:id, :promotion_id, :user_id, :cart_id, :order_id, :discount_amount, :used_at)");
+        $stmt = $this->pdo->prepare('INSERT INTO promotion_usages (id, promotion_id, user_id, cart_id, order_id, discount_amount, used_at) VALUES (:id, :promotion_id, :user_id, :cart_id, :order_id, :discount_amount, :used_at)');
         $stmt->execute([
             'id' => $usage->id,
             'promotion_id' => $usage->promotionId,
@@ -26,11 +26,12 @@ class PdoPromotionUsageRepository implements PromotionUsageRepositoryInterface
 
     public function countUserUsage(string $promotionId, string $userId): int
     {
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM promotion_usages WHERE promotion_id = :promotion_id AND user_id = :user_id");
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM promotion_usages WHERE promotion_id = :promotion_id AND user_id = :user_id');
         $stmt->execute([
             'promotion_id' => $promotionId,
             'user_id' => $userId,
         ]);
-        return (int)$stmt->fetchColumn();
+
+        return (int) $stmt->fetchColumn();
     }
 }

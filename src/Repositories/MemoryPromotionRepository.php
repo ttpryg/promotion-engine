@@ -29,6 +29,7 @@ class MemoryPromotionRepository implements PromotionRepositoryInterface
                 }
             }
         }
+
         return null;
     }
 
@@ -36,12 +37,13 @@ class MemoryPromotionRepository implements PromotionRepositoryInterface
     {
         $result = [];
         foreach ($this->promotions as $promotion) {
-            if ($promotion->isActive && !$promotion->isExpired()) {
+            if ($promotion->isActive && ! $promotion->isExpired()) {
                 if ($storeId === null || $promotion->storeId === null || $promotion->storeId === $storeId) {
                     $result[] = $promotion;
                 }
             }
         }
+
         return $result;
     }
 
@@ -49,8 +51,10 @@ class MemoryPromotionRepository implements PromotionRepositoryInterface
     {
         if (isset($this->promotions[$id])) {
             unset($this->promotions[$id]);
+
             return true;
         }
+
         return false;
     }
 }

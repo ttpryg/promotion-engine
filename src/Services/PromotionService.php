@@ -26,7 +26,7 @@ class PromotionService
         ?PromotionEvaluatorInterface $evaluator = null,
         private readonly ?EventDispatcherInterface $eventDispatcher = null
     ) {
-        $this->evaluator = $evaluator ?? new DefaultPromotionEvaluator();
+        $this->evaluator = $evaluator ?? new DefaultPromotionEvaluator;
     }
 
     public function createPromotion(
@@ -73,7 +73,7 @@ class PromotionService
         $storeId = $context['store_id'] ?? null;
         $promotion = $this->promotionRepo->findByCode($code, $storeId);
 
-        if (!$promotion) {
+        if (! $promotion) {
             return DiscountResult::ineligible('Invalid or non-existent coupon code');
         }
 

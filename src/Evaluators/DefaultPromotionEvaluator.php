@@ -11,7 +11,7 @@ class DefaultPromotionEvaluator implements PromotionEvaluatorInterface
 {
     public function evaluate(Promotion $promotion, array $context): DiscountResult
     {
-        if (!$promotion->isActive) {
+        if (! $promotion->isActive) {
             return DiscountResult::ineligible('Promotion is inactive');
         }
 
@@ -33,7 +33,7 @@ class DefaultPromotionEvaluator implements PromotionEvaluatorInterface
             return DiscountResult::ineligible('Promotion does not belong to this store');
         }
 
-        $subtotal = (float)($context['cart_subtotal'] ?? 0.0);
+        $subtotal = (float) ($context['cart_subtotal'] ?? 0.0);
         if ($subtotal < $promotion->minSpend) {
             return DiscountResult::ineligible(sprintf('Minimum spend requirement of %.2f not met', $promotion->minSpend));
         }

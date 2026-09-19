@@ -14,10 +14,10 @@ class PromotionEvaluatorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->evaluator = new DefaultPromotionEvaluator();
+        $this->evaluator = new DefaultPromotionEvaluator;
     }
 
-    public function testEvaluatesFixedAmountDiscount(): void
+    public function test_evaluates_fixed_amount_discount(): void
     {
         $promotion = new Promotion(
             id: 'promo-1',
@@ -36,7 +36,7 @@ class PromotionEvaluatorTest extends TestCase
         $this->assertEquals(50000.0, $result->discountAmount);
     }
 
-    public function testEvaluatesPercentageDiscountWithMaxCap(): void
+    public function test_evaluates_percentage_discount_with_max_cap(): void
     {
         $promotion = new Promotion(
             id: 'promo-2',
@@ -55,7 +55,7 @@ class PromotionEvaluatorTest extends TestCase
         $this->assertEquals(30000.0, $result->discountAmount);
     }
 
-    public function testRejectsWhenMinSpendNotMet(): void
+    public function test_rejects_when_min_spend_not_met(): void
     {
         $promotion = new Promotion(
             id: 'promo-3',
@@ -74,7 +74,7 @@ class PromotionEvaluatorTest extends TestCase
         $this->assertEquals(0.0, $result->discountAmount);
     }
 
-    public function testRejectsExpiredPromotion(): void
+    public function test_rejects_expired_promotion(): void
     {
         $promotion = new Promotion(
             id: 'promo-4',

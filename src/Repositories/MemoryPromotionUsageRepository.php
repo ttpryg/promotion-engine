@@ -23,6 +23,7 @@ class MemoryPromotionUsageRepository implements PromotionUsageRepositoryInterfac
                 $count++;
             }
         }
+
         return $count;
     }
 }
