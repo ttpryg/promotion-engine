@@ -15,6 +15,6 @@ class PromotionUsage
         public readonly ?string $orderId = null,
         public ?DateTimeImmutable $usedAt = null
     ) {
-        $this->usedAt = $usedAt ?? new DateTimeImmutable();
+        $this->usedAt = $usedAt ?? new DateTimeImmutable;
     }
 }

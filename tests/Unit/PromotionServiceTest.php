@@ -11,17 +11,19 @@ use Ttpryg\PromotionEngine\Services\PromotionService;
 class PromotionServiceTest extends TestCase
 {
     private PromotionService $service;
+
     private MemoryPromotionRepository $promotionRepo;
+
     private MemoryPromotionUsageRepository $usageRepo;
 
     protected function setUp(): void
     {
-        $this->promotionRepo = new MemoryPromotionRepository();
-        $this->usageRepo = new MemoryPromotionUsageRepository();
+        $this->promotionRepo = new MemoryPromotionRepository;
+        $this->usageRepo = new MemoryPromotionUsageRepository;
         $this->service = new PromotionService($this->promotionRepo, $this->usageRepo);
     }
 
-    public function testCreateAndEvaluateCoupon(): void
+    public function test_create_and_evaluate_coupon(): void
     {
         $this->service->createPromotion(
             id: 'p1',
@@ -35,7 +37,7 @@ class PromotionServiceTest extends TestCase
 
         $result = $this->service->evaluateCoupon('MERDEKA17', [
             'cart_subtotal' => 100000.0,
-            'store_id' => 'store-100'
+            'store_id' => 'store-100',
         ]);
 
         $this->assertTrue($result->isEligible);
@@ -43,7 +45,7 @@ class PromotionServiceTest extends TestCase
         $this->assertEquals('MERDEKA17', $result->code);
     }
 
-    public function testRecordUsageIncrementsUsageCount(): void
+    public function test_record_usage_increments_usage_count(): void
     {
         $promo = $this->service->createPromotion(
             id: 'p2',
@@ -65,7 +67,7 @@ class PromotionServiceTest extends TestCase
         // Second evaluation for same user should fail due to user usage limit
         $result = $this->service->evaluateCoupon('ONECE', [
             'cart_subtotal' => 50000.0,
-            'user_id' => 'user-777'
+            'user_id' => 'user-777',
         ]);
 
         $this->assertFalse($result->isEligible);

@@ -16,6 +16,7 @@
         "psr/event-dispatcher": "^1.0"
     },
     "require-dev": {
+        "laravel/pint": "^1.20",
         "phpunit/phpunit": "^10.0"
     },
     "autoload": {
@@ -29,7 +30,9 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit"
+        "test": "vendor/bin/phpunit",
+        "fix:check": "vendor/bin/pint --test",
+        "fix": "vendor/bin/pint"
     },
     "config": {
         "sort-packages": true

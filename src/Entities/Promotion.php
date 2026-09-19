@@ -27,19 +27,20 @@ class Promotion
         public ?DateTimeImmutable $createdAt = null,
         public ?DateTimeImmutable $updatedAt = null
     ) {
-        $this->createdAt = $createdAt ?? new DateTimeImmutable();
-        $this->updatedAt = $updatedAt ?? new DateTimeImmutable();
+        $this->createdAt = $createdAt ?? new DateTimeImmutable;
+        $this->updatedAt = $updatedAt ?? new DateTimeImmutable;
     }
 
     public function isExpired(?DateTimeImmutable $now = null): bool
     {
-        $now = $now ?? new DateTimeImmutable();
+        $now = $now ?? new DateTimeImmutable;
         if ($this->startAt !== null && $now < $this->startAt) {
             return true;
         }
         if ($this->endAt !== null && $now > $this->endAt) {
             return true;
         }
+
         return false;
     }
 
@@ -48,12 +49,13 @@ class Promotion
         if ($this->usageLimit === null) {
             return false;
         }
+
         return $this->usageCount >= $this->usageLimit;
     }
 
     public function incrementUsage(): void
     {
         $this->usageCount++;
-        $this->updatedAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable;
     }
 }
