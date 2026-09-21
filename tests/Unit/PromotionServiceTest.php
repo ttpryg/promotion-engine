@@ -28,21 +28,21 @@ class PromotionServiceTest extends TestCase
         $this->promotionService->createPromotion(
             id: 'p1',
             name: 'Voucher Merdeka',
-            type: PromotionType::PERCENTAGE,
             value: 17.0,
             code: 'MERDEKA17',
+            storeId: 'store-100',
             minSpend: 50000.0,
-            storeId: 'store-100'
+            type: PromotionType::PERCENTAGE
         );
 
-        $result = $this->promotionService->evaluateCoupon('MERDEKA17', [
+        $discountResult = $this->promotionService->evaluateCoupon('MERDEKA17', [
             'cart_subtotal' => 100000.0,
             'store_id' => 'store-100',
         ]);
 
-        $this->assertTrue($result->isEligible);
-        $this->assertEquals(17000.0, $result->discountAmount);
-        $this->assertEquals('MERDEKA17', $result->code);
+        $this->assertTrue($discountResult->isEligible);
+        $this->assertEquals(17000.0, $discountResult->discountAmount);
+        $this->assertEquals('MERDEKA17', $discountResult->code);
     }
 
     public function test_record_usage_increments_usage_count(): void
@@ -50,10 +50,10 @@ class PromotionServiceTest extends TestCase
         $this->promotionService->createPromotion(
             id: 'p2',
             name: 'Kupon 1x Pakai',
-            type: PromotionType::FIXED_AMOUNT,
             value: 10000.0,
             code: 'ONECE',
-            userUsageLimit: 1
+            userUsageLimit: 1,
+            type: PromotionType::FIXED_AMOUNT
         );
 
         $this->promotionService->recordPromotionUsage(
@@ -65,12 +65,12 @@ class PromotionServiceTest extends TestCase
         );
 
         // Second evaluation for same user should fail due to user usage limit
-        $result = $this->promotionService->evaluateCoupon('ONECE', [
+        $discountResult = $this->promotionService->evaluateCoupon('ONECE', [
             'cart_subtotal' => 50000.0,
             'user_id' => 'user-777',
         ]);
 
-        $this->assertFalse($result->isEligible);
-        $this->assertStringContainsString('limit reached', strtolower($result->reason));
+        $this->assertFalse($discountResult->isEligible);
+        $this->assertStringContainsString('limit reached', strtolower($discountResult->reason));
     }
 }

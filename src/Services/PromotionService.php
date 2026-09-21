@@ -73,7 +73,7 @@ class PromotionService
         $storeId = $context['store_id'] ?? null;
         $promotion = $this->promotionRepository->findByCode($code, $storeId);
 
-        if (! $promotion) {
+        if (! $promotion instanceof \Ttpryg\PromotionEngine\Entities\Promotion) {
             return DiscountResult::ineligible('Invalid or non-existent coupon code');
         }
 
@@ -81,13 +81,13 @@ class PromotionService
             $context['user_usage_count'] = $this->promotionUsageRepository->countUserUsage($promotion->id, $context['user_id']);
         }
 
-        $result = $this->promotionEvaluator->evaluate($promotion, $context);
+        $discountResult = $this->promotionEvaluator->evaluate($promotion, $context);
 
-        if ($result->isEligible) {
-            $this->eventDispatcher?->dispatch(new PromotionAppliedEvent($promotion, $result, $context));
+        if ($discountResult->isEligible) {
+            $this->eventDispatcher?->dispatch(new PromotionAppliedEvent($promotion, $discountResult, $context));
         }
 
-        return $result;
+        return $discountResult;
     }
 
     public function findBestAutomaticPromotion(array $context): ?DiscountResult
@@ -110,7 +110,7 @@ class PromotionService
             $result = $this->promotionEvaluator->evaluate($activePromotion, $context);
 
             if ($result->isEligible) {
-                if ($bestResult === null || $result->discountAmount > $bestResult->discountAmount) {
+                if (! $bestResult instanceof \Ttpryg\PromotionEngine\DTO\DiscountResult || $result->discountAmount > $bestResult->discountAmount) {
                     $bestResult = $result;
                 }
             }
@@ -128,7 +128,7 @@ class PromotionService
         ?string $orderId = null
     ): PromotionUsage {
         $promotion = $this->promotionRepository->findById($promotionId);
-        if ($promotion) {
+        if ($promotion instanceof \Ttpryg\PromotionEngine\Entities\Promotion) {
             $promotion->incrementUsage();
             $this->promotionRepository->save($promotion);
         }
