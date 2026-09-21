@@ -32,9 +32,15 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit",
-        "fix:check": "vendor/bin/pint --test",
-        "fix": "vendor/bin/pint"
+        "test": "phpunit",
+        "fix:check": [
+            "vendor/bin/rector process --dry-run",
+            "vendor/bin/pint --test"
+        ],
+        "fix": [
+            "vendor/bin/rector process",
+            "vendor/bin/pint"
+        ]
     },
     "config": {
         "sort-packages": true

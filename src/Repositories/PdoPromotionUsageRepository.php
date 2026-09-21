@@ -10,17 +10,17 @@ class PdoPromotionUsageRepository implements PromotionUsageRepositoryInterface
 {
     public function __construct(private readonly PDO $pdo) {}
 
-    public function recordUsage(PromotionUsage $usage): void
+    public function recordUsage(PromotionUsage $promotionUsage): void
     {
         $stmt = $this->pdo->prepare('INSERT INTO promotion_usages (id, promotion_id, user_id, cart_id, order_id, discount_amount, used_at) VALUES (:id, :promotion_id, :user_id, :cart_id, :order_id, :discount_amount, :used_at)');
         $stmt->execute([
-            'id' => $usage->id,
-            'promotion_id' => $usage->promotionId,
-            'user_id' => $usage->userId,
-            'cart_id' => $usage->cartId,
-            'order_id' => $usage->orderId,
-            'discount_amount' => $usage->discountAmount,
-            'used_at' => $usage->usedAt->format('Y-m-d H:i:s'),
+            'id' => $promotionUsage->id,
+            'promotion_id' => $promotionUsage->promotionId,
+            'user_id' => $promotionUsage->userId,
+            'cart_id' => $promotionUsage->cartId,
+            'order_id' => $promotionUsage->orderId,
+            'discount_amount' => $promotionUsage->discountAmount,
+            'used_at' => $promotionUsage->usedAt->format('Y-m-d H:i:s'),
         ]);
     }
 

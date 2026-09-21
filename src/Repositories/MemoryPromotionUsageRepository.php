@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\PromotionEngine\Repositories;
 
 use Ttpryg\PromotionEngine\Contracts\PromotionUsageRepositoryInterface;
@@ -10,9 +12,9 @@ class MemoryPromotionUsageRepository implements PromotionUsageRepositoryInterfac
     /** @var array<string, PromotionUsage> */
     private array $usages = [];
 
-    public function recordUsage(PromotionUsage $usage): void
+    public function recordUsage(PromotionUsage $promotionUsage): void
     {
-        $this->usages[$usage->id] = $usage;
+        $this->usages[$promotionUsage->id] = $promotionUsage;
     }
 
     public function countUserUsage(string $promotionId, string $userId): int

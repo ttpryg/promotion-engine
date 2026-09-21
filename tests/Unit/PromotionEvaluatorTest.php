@@ -10,11 +10,11 @@ use Ttpryg\PromotionEngine\Evaluators\DefaultPromotionEvaluator;
 
 class PromotionEvaluatorTest extends TestCase
 {
-    private DefaultPromotionEvaluator $evaluator;
+    private DefaultPromotionEvaluator $defaultPromotionEvaluator;
 
     protected function setUp(): void
     {
-        $this->evaluator = new DefaultPromotionEvaluator;
+        $this->defaultPromotionEvaluator = new DefaultPromotionEvaluator;
     }
 
     public function test_evaluates_fixed_amount_discount(): void
@@ -30,7 +30,7 @@ class PromotionEvaluatorTest extends TestCase
         );
 
         $context = ['cart_subtotal' => 150000.0];
-        $result = $this->evaluator->evaluate($promotion, $context);
+        $result = $this->defaultPromotionEvaluator->evaluate($promotion, $context);
 
         $this->assertTrue($result->isEligible);
         $this->assertEquals(50000.0, $result->discountAmount);
@@ -49,7 +49,7 @@ class PromotionEvaluatorTest extends TestCase
         );
 
         $context = ['cart_subtotal' => 200000.0]; // 20% of 200k = 40k, capped at 30k
-        $result = $this->evaluator->evaluate($promotion, $context);
+        $result = $this->defaultPromotionEvaluator->evaluate($promotion, $context);
 
         $this->assertTrue($result->isEligible);
         $this->assertEquals(30000.0, $result->discountAmount);
@@ -68,7 +68,7 @@ class PromotionEvaluatorTest extends TestCase
         );
 
         $context = ['cart_subtotal' => 100000.0];
-        $result = $this->evaluator->evaluate($promotion, $context);
+        $result = $this->defaultPromotionEvaluator->evaluate($promotion, $context);
 
         $this->assertFalse($result->isEligible);
         $this->assertEquals(0.0, $result->discountAmount);
@@ -87,7 +87,7 @@ class PromotionEvaluatorTest extends TestCase
             endAt: new DateTimeImmutable('-1 day')
         );
 
-        $result = $this->evaluator->evaluate($promotion, ['cart_subtotal' => 500000.0]);
+        $result = $this->defaultPromotionEvaluator->evaluate($promotion, ['cart_subtotal' => 500000.0]);
 
         $this->assertFalse($result->isEligible);
         $this->assertStringContainsString('expired', strtolower($result->reason));

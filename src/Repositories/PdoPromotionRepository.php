@@ -16,7 +16,7 @@ class PdoPromotionRepository implements PromotionRepositoryInterface
     {
         $existing = $this->findById($promotion->id);
 
-        $sql = $existing
+        $sql = $existing instanceof \Ttpryg\PromotionEngine\Entities\Promotion
             ? 'UPDATE promotions SET code = :code, name = :name, description = :description, type = :type, value = :value, store_id = :store_id, owner_id = :owner_id, min_spend = :min_spend, max_discount = :max_discount, usage_limit = :usage_limit, usage_count = :usage_count, user_usage_limit = :user_usage_limit, start_at = :start_at, end_at = :end_at, is_active = :is_active, updated_at = :updated_at WHERE id = :id'
             : 'INSERT INTO promotions (id, code, name, description, type, value, store_id, owner_id, min_spend, max_discount, usage_limit, usage_count, user_usage_limit, start_at, end_at, is_active, created_at, updated_at) VALUES (:id, :code, :name, :description, :type, :value, :store_id, :owner_id, :min_spend, :max_discount, :usage_limit, :usage_count, :user_usage_limit, :start_at, :end_at, :is_active, :created_at, :updated_at)';
 

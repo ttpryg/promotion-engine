@@ -12,7 +12,7 @@ class PdoPromotionRepositoryTest extends TestCase
 {
     private PDO $pdo;
 
-    private PdoPromotionRepository $repository;
+    private PdoPromotionRepository $pdoPromotionRepository;
 
     protected function setUp(): void
     {
@@ -22,7 +22,7 @@ class PdoPromotionRepositoryTest extends TestCase
         $schema = file_get_contents(__DIR__.'/../../database/schema.sql');
         $this->pdo->exec($schema);
 
-        $this->repository = new PdoPromotionRepository($this->pdo);
+        $this->pdoPromotionRepository = new PdoPromotionRepository($this->pdo);
     }
 
     public function test_save_and_find_by_code(): void
@@ -40,9 +40,9 @@ class PdoPromotionRepositoryTest extends TestCase
             maxDiscount: 10000.0
         );
 
-        $this->repository->save($promotion);
+        $this->pdoPromotionRepository->save($promotion);
 
-        $fetched = $this->repository->findByCode('SQLITE20', 'store-abc');
+        $fetched = $this->pdoPromotionRepository->findByCode('SQLITE20', 'store-abc');
 
         $this->assertNotNull($fetched);
         $this->assertEquals('promo-sqlite-1', $fetched->id);
