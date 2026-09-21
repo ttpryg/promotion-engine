@@ -3,7 +3,7 @@
 namespace Ttpryg\PromotionEngine\Services;
 
 use DateTimeImmutable;
-use Psr\EventDispatcher\EventDispatcherInterface;
+use Ttpryg\EventDispatcher\Contracts\EventDispatcherInterface;
 use Ttpryg\PromotionEngine\Contracts\PromotionEvaluatorInterface;
 use Ttpryg\PromotionEngine\Contracts\PromotionRepositoryInterface;
 use Ttpryg\PromotionEngine\Contracts\PromotionUsageRepositoryInterface;
