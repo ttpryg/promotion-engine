@@ -28,11 +28,11 @@ class PromotionServiceTest extends TestCase
         $this->promotionService->createPromotion(
             id: 'p1',
             name: 'Voucher Merdeka',
-            type: PromotionType::PERCENTAGE,
             value: 17.0,
             code: 'MERDEKA17',
             storeId: 'store-100',
-            minSpend: 50000.0
+            minSpend: 50000.0,
+            type: PromotionType::PERCENTAGE
         );
 
         $discountResult = $this->promotionService->evaluateCoupon('MERDEKA17', [
@@ -50,10 +50,10 @@ class PromotionServiceTest extends TestCase
         $this->promotionService->createPromotion(
             id: 'p2',
             name: 'Kupon 1x Pakai',
-            type: PromotionType::FIXED_AMOUNT,
             value: 10000.0,
             code: 'ONECE',
-            userUsageLimit: 1
+            userUsageLimit: 1,
+            type: PromotionType::FIXED_AMOUNT
         );
 
         $this->promotionService->recordPromotionUsage(
