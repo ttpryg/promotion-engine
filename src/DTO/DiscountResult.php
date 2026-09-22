@@ -17,7 +17,6 @@ class DiscountResult
         return new self(
             isEligible: true,
             discountAmount: round($discountAmount, 2),
-            reason: null,
             promotionId: $promotionId,
             code: $code
         );

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\PromotionEngine\Events;
 
 use Ttpryg\PromotionEngine\Entities\PromotionUsage;

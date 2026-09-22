@@ -10,44 +10,44 @@ use Ttpryg\PromotionEngine\Services\PromotionService;
 
 class PromotionServiceTest extends TestCase
 {
-    private PromotionService $service;
+    private PromotionService $promotionService;
 
-    private MemoryPromotionRepository $promotionRepo;
+    private MemoryPromotionRepository $memoryPromotionRepository;
 
-    private MemoryPromotionUsageRepository $usageRepo;
+    private MemoryPromotionUsageRepository $memoryPromotionUsageRepository;
 
     protected function setUp(): void
     {
-        $this->promotionRepo = new MemoryPromotionRepository;
-        $this->usageRepo = new MemoryPromotionUsageRepository;
-        $this->service = new PromotionService($this->promotionRepo, $this->usageRepo);
+        $this->memoryPromotionRepository = new MemoryPromotionRepository;
+        $this->memoryPromotionUsageRepository = new MemoryPromotionUsageRepository;
+        $this->promotionService = new PromotionService($this->memoryPromotionRepository, $this->memoryPromotionUsageRepository);
     }
 
     public function test_create_and_evaluate_coupon(): void
     {
-        $this->service->createPromotion(
+        $this->promotionService->createPromotion(
             id: 'p1',
             name: 'Voucher Merdeka',
             type: PromotionType::PERCENTAGE,
             value: 17.0,
             code: 'MERDEKA17',
-            minSpend: 50000.0,
-            storeId: 'store-100'
+            storeId: 'store-100',
+            minSpend: 50000.0
         );
 
-        $result = $this->service->evaluateCoupon('MERDEKA17', [
+        $discountResult = $this->promotionService->evaluateCoupon('MERDEKA17', [
             'cart_subtotal' => 100000.0,
             'store_id' => 'store-100',
         ]);
 
-        $this->assertTrue($result->isEligible);
-        $this->assertEquals(17000.0, $result->discountAmount);
-        $this->assertEquals('MERDEKA17', $result->code);
+        $this->assertTrue($discountResult->isEligible);
+        $this->assertEquals(17000.0, $discountResult->discountAmount);
+        $this->assertEquals('MERDEKA17', $discountResult->code);
     }
 
     public function test_record_usage_increments_usage_count(): void
     {
-        $promo = $this->service->createPromotion(
+        $this->promotionService->createPromotion(
             id: 'p2',
             name: 'Kupon 1x Pakai',
             type: PromotionType::FIXED_AMOUNT,
@@ -56,7 +56,7 @@ class PromotionServiceTest extends TestCase
             userUsageLimit: 1
         );
 
-        $this->service->recordPromotionUsage(
+        $this->promotionService->recordPromotionUsage(
             usageId: 'u1',
             promotionId: 'p2',
             userId: 'user-777',
@@ -65,12 +65,12 @@ class PromotionServiceTest extends TestCase
         );
 
         // Second evaluation for same user should fail due to user usage limit
-        $result = $this->service->evaluateCoupon('ONECE', [
+        $discountResult = $this->promotionService->evaluateCoupon('ONECE', [
             'cart_subtotal' => 50000.0,
             'user_id' => 'user-777',
         ]);
 
-        $this->assertFalse($result->isEligible);
-        $this->assertStringContainsString('limit reached', strtolower($result->reason));
+        $this->assertFalse($discountResult->isEligible);
+        $this->assertStringContainsString('limit reached', strtolower($discountResult->reason));
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\PromotionEngine\Entities;
 
 use DateTimeImmutable;
@@ -33,15 +35,12 @@ class Promotion
 
     public function isExpired(?DateTimeImmutable $now = null): bool
     {
-        $now = $now ?? new DateTimeImmutable;
-        if ($this->startAt !== null && $now < $this->startAt) {
-            return true;
-        }
-        if ($this->endAt !== null && $now > $this->endAt) {
+        $now ??= new DateTimeImmutable;
+        if ($this->startAt instanceof \DateTimeImmutable && $now < $this->startAt) {
             return true;
         }
 
-        return false;
+        return $this->endAt instanceof \DateTimeImmutable && $now > $this->endAt;
     }
 
     public function hasReachedGlobalUsageLimit(): bool

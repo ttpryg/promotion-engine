@@ -3,7 +3,7 @@
 namespace Ttpryg\PromotionEngine\Services;
 
 use DateTimeImmutable;
-use Psr\EventDispatcher\EventDispatcherInterface;
+use Ttpryg\EventDispatcher\Contracts\EventDispatcherInterface;
 use Ttpryg\PromotionEngine\Contracts\PromotionEvaluatorInterface;
 use Ttpryg\PromotionEngine\Contracts\PromotionRepositoryInterface;
 use Ttpryg\PromotionEngine\Contracts\PromotionUsageRepositoryInterface;
@@ -18,15 +18,15 @@ use Ttpryg\PromotionEngine\Events\PromotionUsedEvent;
 
 class PromotionService
 {
-    private PromotionEvaluatorInterface $evaluator;
+    private readonly PromotionEvaluatorInterface $promotionEvaluator;
 
     public function __construct(
-        private readonly PromotionRepositoryInterface $promotionRepo,
-        private readonly PromotionUsageRepositoryInterface $usageRepo,
-        ?PromotionEvaluatorInterface $evaluator = null,
+        private readonly PromotionRepositoryInterface $promotionRepository,
+        private readonly PromotionUsageRepositoryInterface $promotionUsageRepository,
+        ?PromotionEvaluatorInterface $promotionEvaluator = null,
         private readonly ?EventDispatcherInterface $eventDispatcher = null
     ) {
-        $this->evaluator = $evaluator ?? new DefaultPromotionEvaluator;
+        $this->promotionEvaluator = $promotionEvaluator ?? new DefaultPromotionEvaluator;
     }
 
     public function createPromotion(
@@ -62,7 +62,7 @@ class PromotionService
             endAt: $endAt
         );
 
-        $this->promotionRepo->save($promotion);
+        $this->promotionRepository->save($promotion);
         $this->eventDispatcher?->dispatch(new PromotionCreatedEvent($promotion));
 
         return $promotion;
@@ -71,46 +71,46 @@ class PromotionService
     public function evaluateCoupon(string $code, array $context): DiscountResult
     {
         $storeId = $context['store_id'] ?? null;
-        $promotion = $this->promotionRepo->findByCode($code, $storeId);
+        $promotion = $this->promotionRepository->findByCode($code, $storeId);
 
-        if (! $promotion) {
+        if (! $promotion instanceof \Ttpryg\PromotionEngine\Entities\Promotion) {
             return DiscountResult::ineligible('Invalid or non-existent coupon code');
         }
 
         if (isset($context['user_id'])) {
-            $context['user_usage_count'] = $this->usageRepo->countUserUsage($promotion->id, $context['user_id']);
+            $context['user_usage_count'] = $this->promotionUsageRepository->countUserUsage($promotion->id, $context['user_id']);
         }
 
-        $result = $this->evaluator->evaluate($promotion, $context);
+        $discountResult = $this->promotionEvaluator->evaluate($promotion, $context);
 
-        if ($result->isEligible) {
-            $this->eventDispatcher?->dispatch(new PromotionAppliedEvent($promotion, $result, $context));
+        if ($discountResult->isEligible) {
+            $this->eventDispatcher?->dispatch(new PromotionAppliedEvent($promotion, $discountResult, $context));
         }
 
-        return $result;
+        return $discountResult;
     }
 
     public function findBestAutomaticPromotion(array $context): ?DiscountResult
     {
         $storeId = $context['store_id'] ?? null;
-        $activePromotions = $this->promotionRepo->findActivePromotions($storeId);
+        $activePromotions = $this->promotionRepository->findActivePromotions($storeId);
 
         $bestResult = null;
 
-        foreach ($activePromotions as $promotion) {
+        foreach ($activePromotions as $activePromotion) {
             // Automatic promotions don't require coupon codes
-            if ($promotion->code !== null) {
+            if ($activePromotion->code !== null) {
                 continue;
             }
 
             if (isset($context['user_id'])) {
-                $context['user_usage_count'] = $this->usageRepo->countUserUsage($promotion->id, $context['user_id']);
+                $context['user_usage_count'] = $this->promotionUsageRepository->countUserUsage($activePromotion->id, $context['user_id']);
             }
 
-            $result = $this->evaluator->evaluate($promotion, $context);
+            $result = $this->promotionEvaluator->evaluate($activePromotion, $context);
 
             if ($result->isEligible) {
-                if ($bestResult === null || $result->discountAmount > $bestResult->discountAmount) {
+                if (! $bestResult instanceof \Ttpryg\PromotionEngine\DTO\DiscountResult || $result->discountAmount > $bestResult->discountAmount) {
                     $bestResult = $result;
                 }
             }
@@ -127,13 +127,13 @@ class PromotionService
         ?string $cartId = null,
         ?string $orderId = null
     ): PromotionUsage {
-        $promotion = $this->promotionRepo->findById($promotionId);
-        if ($promotion) {
+        $promotion = $this->promotionRepository->findById($promotionId);
+        if ($promotion instanceof \Ttpryg\PromotionEngine\Entities\Promotion) {
             $promotion->incrementUsage();
-            $this->promotionRepo->save($promotion);
+            $this->promotionRepository->save($promotion);
         }
 
-        $usage = new PromotionUsage(
+        $promotionUsage = new PromotionUsage(
             id: $usageId,
             promotionId: $promotionId,
             userId: $userId,
@@ -142,9 +142,9 @@ class PromotionService
             orderId: $orderId
         );
 
-        $this->usageRepo->recordUsage($usage);
-        $this->eventDispatcher?->dispatch(new PromotionUsedEvent($usage));
+        $this->promotionUsageRepository->recordUsage($promotionUsage);
+        $this->eventDispatcher?->dispatch(new PromotionUsedEvent($promotionUsage));
 
-        return $usage;
+        return $promotionUsage;
     }
 }
