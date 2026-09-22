@@ -16,5 +16,5 @@ return RectorConfig::configure()
         SetList::DEAD_CODE,
         SetList::TYPE_DECLARATION,
         SetList::NAMING,
-        SetList::NAMED_ARGS,
+        // SetList::NAMED_ARGS,
     ]);
