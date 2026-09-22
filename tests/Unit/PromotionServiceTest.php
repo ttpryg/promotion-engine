@@ -28,7 +28,7 @@ class PromotionServiceTest extends TestCase
         $this->promotionService->createPromotion(
             id: 'p1',
             name: 'Voucher Merdeka',
-            promotionType: PromotionType::PERCENTAGE,
+            type: PromotionType::PERCENTAGE,
             value: 17.0,
             code: 'MERDEKA17',
             storeId: 'store-100',
@@ -50,7 +50,7 @@ class PromotionServiceTest extends TestCase
         $this->promotionService->createPromotion(
             id: 'p2',
             name: 'Kupon 1x Pakai',
-            promotionType: PromotionType::FIXED_AMOUNT,
+            type: PromotionType::FIXED_AMOUNT,
             value: 10000.0,
             code: 'ONECE',
             userUsageLimit: 1

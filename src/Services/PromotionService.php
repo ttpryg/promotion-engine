@@ -32,7 +32,7 @@ class PromotionService
     public function createPromotion(
         string $id,
         string $name,
-        PromotionType $promotionType,
+        PromotionType $type,
         float $value,
         ?string $code = null,
         ?string $description = null,
@@ -50,7 +50,7 @@ class PromotionService
             code: $code,
             name: $name,
             description: $description,
-            type: $promotionType,
+            type: $type,
             value: $value,
             storeId: $storeId,
             ownerId: $ownerId,
