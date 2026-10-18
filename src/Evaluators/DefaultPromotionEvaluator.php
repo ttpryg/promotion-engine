@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\PromotionEngine\Evaluators;
 
 use Ttpryg\PromotionEngine\Contracts\PromotionEvaluatorInterface;
@@ -9,6 +11,9 @@ use Ttpryg\PromotionEngine\Enums\PromotionType;
 
 class DefaultPromotionEvaluator implements PromotionEvaluatorInterface
 {
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public function evaluate(Promotion $promotion, array $context): DiscountResult
     {
         if (! $promotion->isActive) {

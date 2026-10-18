@@ -10,6 +10,10 @@ use Ttpryg\PromotionEngine\Exceptions\InvalidPromotionException;
 
 class Promotion
 {
+    public DateTimeImmutable $createdAt;
+
+    public DateTimeImmutable $updatedAt;
+
     public function __construct(
         public readonly string $id,
         public readonly ?string $code,
@@ -27,8 +31,8 @@ class Promotion
         public ?DateTimeImmutable $startAt = null,
         public ?DateTimeImmutable $endAt = null,
         public bool $isActive = true,
-        public ?DateTimeImmutable $createdAt = null,
-        public ?DateTimeImmutable $updatedAt = null
+        ?DateTimeImmutable $createdAt = null,
+        ?DateTimeImmutable $updatedAt = null
     ) {
         $this->createdAt = $createdAt ?? new DateTimeImmutable;
         $this->updatedAt = $updatedAt ?? new DateTimeImmutable;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\PromotionEngine\Repositories;
 
 use DateTimeImmutable;
@@ -111,6 +113,9 @@ class PdoPromotionRepository implements PromotionRepositoryInterface
         return (int) $stmt->fetchColumn() > 0;
     }
 
+    /**
+     * @return array<int, Promotion>
+     */
     public function findActivePromotions(?string $storeId = null): array
     {
         $sql = 'SELECT * FROM promotions WHERE is_active = 1';
@@ -143,6 +148,9 @@ class PdoPromotionRepository implements PromotionRepositoryInterface
         return $stmt->execute(['id' => $id]);
     }
 
+    /**
+     * @param  array<string, mixed>  $row
+     */
     private function mapToEntity(array $row): Promotion
     {
         return new Promotion(

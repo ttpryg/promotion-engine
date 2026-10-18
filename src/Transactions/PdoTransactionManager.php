@@ -22,15 +22,14 @@ class PdoTransactionManager implements TransactionManagerInterface
 
         try {
             $result = $callback();
-            $this->pdo->commit();
-
-            return $result;
         } catch (Throwable $exception) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
+            $this->pdo->rollBack();
 
             throw $exception;
         }
+
+        $this->pdo->commit();
+
+        return $result;
     }
 }
