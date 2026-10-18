@@ -52,6 +52,36 @@ class PdoPromotionRepositoryTest extends TestCase
         $this->assertEquals('store-abc', $fetched->storeId);
     }
 
+    public function test_find_by_code_prioritizes_store_scoped_over_global(): void
+    {
+        $this->pdoPromotionRepository->save(new Promotion(
+            id: 'promo-global',
+            code: 'PRIORITY',
+            name: 'Global Coupon',
+            description: null,
+            type: PromotionType::FIXED_AMOUNT,
+            value: 10000.0
+        ));
+
+        $this->pdoPromotionRepository->save(new Promotion(
+            id: 'promo-store',
+            code: 'PRIORITY',
+            name: 'Store Coupon',
+            description: null,
+            type: PromotionType::FIXED_AMOUNT,
+            value: 20000.0,
+            storeId: 'store-1'
+        ));
+
+        $storeMatch = $this->pdoPromotionRepository->findByCode('priority', 'store-1');
+        $this->assertNotNull($storeMatch);
+        $this->assertSame('promo-store', $storeMatch->id);
+
+        $globalMatch = $this->pdoPromotionRepository->findByCode('priority', 'store-2');
+        $this->assertNotNull($globalMatch);
+        $this->assertSame('promo-global', $globalMatch->id);
+    }
+
     public function test_code_exists_is_scoped_to_exact_store(): void
     {
         $this->pdoPromotionRepository->save(new Promotion(

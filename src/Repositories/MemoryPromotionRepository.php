@@ -36,15 +36,27 @@ class MemoryPromotionRepository implements PromotionRepositoryInterface
 
     public function findByCode(string $code, ?string $storeId = null): ?Promotion
     {
+        $globalFallback = null;
+
         foreach ($this->promotions as $promotion) {
-            if ($promotion->code !== null && strcasecmp($promotion->code, $code) === 0) {
-                if ($storeId === null || $promotion->storeId === null || $promotion->storeId === $storeId) {
-                    return $promotion;
-                }
+            if ($promotion->code === null || strcasecmp($promotion->code, $code) !== 0) {
+                continue;
+            }
+
+            if ($storeId === null) {
+                return $promotion;
+            }
+
+            if ($promotion->storeId === $storeId) {
+                return $promotion;
+            }
+
+            if ($promotion->storeId === null && $globalFallback === null) {
+                $globalFallback = $promotion;
             }
         }
 
-        return null;
+        return $globalFallback;
     }
 
     public function codeExists(string $code, ?string $storeId = null, ?string $excludeId = null): bool
