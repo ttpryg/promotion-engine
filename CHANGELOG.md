@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PromotionService::recordPromotionUsage()` now throws `PromotionNotFoundException` when the promotion does not exist, distinct from `PromotionUsageLimitExceededException`.
 - `PromotionService::createPromotion()` validates the promotion domain invariants and rejects duplicate coupon codes within the same store scope.
 - `findByCode()` now deterministically prioritizes store-scoped coupons over platform-wide global coupons when both share the same code (applied to both PDO and in-memory repositories).
+- Discount amounts are now explicitly rounded to two decimals in `DefaultPromotionEvaluator` and normalized in the `DiscountResult` constructor, eliminating floating-point drift in money calculations.
 
 ---
 

@@ -55,6 +55,24 @@ class PromotionEvaluatorTest extends TestCase
         $this->assertEquals(30000.0, $discountResult->discountAmount);
     }
 
+    public function test_percentage_discount_is_rounded_to_two_decimals(): void
+    {
+        $promotion = new Promotion(
+            id: 'promo-precision',
+            code: 'PRECISION',
+            name: 'Diskon 33.33%',
+            description: null,
+            type: PromotionType::PERCENTAGE,
+            value: 33.33
+        );
+
+        // 33.33% of 99.99 = 33.326667 -> 33.33
+        $discountResult = $this->defaultPromotionEvaluator->evaluate($promotion, ['cart_subtotal' => 99.99]);
+
+        $this->assertTrue($discountResult->isEligible);
+        $this->assertSame(33.33, $discountResult->discountAmount);
+    }
+
     public function test_rejects_when_min_spend_not_met(): void
     {
         $promotion = new Promotion(
