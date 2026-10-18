@@ -6,6 +6,7 @@ namespace Ttpryg\PromotionEngine\Entities;
 
 use DateTimeImmutable;
 use Ttpryg\PromotionEngine\Enums\PromotionType;
+use Ttpryg\PromotionEngine\Exceptions\InvalidPromotionException;
 
 class Promotion
 {
@@ -31,6 +32,37 @@ class Promotion
     ) {
         $this->createdAt = $createdAt ?? new DateTimeImmutable;
         $this->updatedAt = $updatedAt ?? new DateTimeImmutable;
+
+        $this->validate();
+    }
+
+    public function validate(): void
+    {
+        if ($this->code !== null && trim($this->code) === '') {
+            throw InvalidPromotionException::emptyCode();
+        }
+
+        if ($this->type === PromotionType::PERCENTAGE) {
+            if ($this->value < 0.01 || $this->value > 100.00) {
+                throw InvalidPromotionException::percentageOutOfRange($this->value);
+            }
+        } elseif ($this->value < 0.0) {
+            throw InvalidPromotionException::negativeAmount('Discount value', $this->value);
+        }
+
+        if ($this->minSpend < 0.0) {
+            throw InvalidPromotionException::negativeAmount('Minimum spend', $this->minSpend);
+        }
+
+        if ($this->maxDiscount !== null && $this->maxDiscount < 0.0) {
+            throw InvalidPromotionException::negativeAmount('Maximum discount', $this->maxDiscount);
+        }
+
+        if ($this->startAt instanceof DateTimeImmutable
+            && $this->endAt instanceof DateTimeImmutable
+            && $this->startAt > $this->endAt) {
+            throw InvalidPromotionException::invalidDateRange();
+        }
     }
 
     public function isExpired(?DateTimeImmutable $now = null): bool

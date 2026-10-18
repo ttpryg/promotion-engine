@@ -52,6 +52,24 @@ class PdoPromotionRepositoryTest extends TestCase
         $this->assertEquals('store-abc', $fetched->storeId);
     }
 
+    public function test_code_exists_is_scoped_to_exact_store(): void
+    {
+        $this->pdoPromotionRepository->save(new Promotion(
+            id: 'promo-scope-store',
+            code: 'SCOPED',
+            name: 'Store Coupon',
+            description: null,
+            type: PromotionType::FIXED_AMOUNT,
+            value: 10000.0,
+            storeId: 'store-1'
+        ));
+
+        $this->assertTrue($this->pdoPromotionRepository->codeExists('scoped', 'store-1'));
+        $this->assertFalse($this->pdoPromotionRepository->codeExists('scoped', 'store-2'));
+        $this->assertFalse($this->pdoPromotionRepository->codeExists('scoped'));
+        $this->assertFalse($this->pdoPromotionRepository->codeExists('scoped', 'store-1', 'promo-scope-store'));
+    }
+
     public function test_increment_usage_count_respects_global_limit(): void
     {
         $promotion = new Promotion(

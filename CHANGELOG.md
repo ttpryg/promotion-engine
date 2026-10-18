@@ -15,13 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TransactionManagerInterface` with `PdoTransactionManager` (PDO-backed ACID transactions) and `NullTransactionManager` (no-op default) implementations.
 - Optional `$transactionManager` argument on the `PromotionService` constructor.
 - Database indexes in `database/schema.sql`: `idx_promotions_code`, `idx_promotions_store_active` (store lookup), `idx_usages_promo_user` (per-user usage counting), and `idx_usages_order_id`.
+- Domain exceptions: `InvalidPromotionException` and `PromotionNotFoundException`.
+- `PromotionRepositoryInterface::codeExists()` for per-store coupon code uniqueness checks.
+- `Promotion::validate()` domain guard clauses for percentage bounds, non-negative amounts, valid date ranges, and non-empty coupon codes.
 
 ### Changed
 - `PromotionService::recordPromotionUsage()` now uses the atomic `incrementUsageCount()` instead of a read-modify-write cycle, preventing race conditions and overselling during simultaneous checkouts.
 - `PromotionService::recordPromotionUsage()` wraps the usage counter increment and usage history insert in a single database transaction, rolling both back on failure; `PromotionUsedEvent` is dispatched only after a successful commit.
+- `PromotionService::recordPromotionUsage()` now throws `PromotionNotFoundException` when the promotion does not exist, distinct from `PromotionUsageLimitExceededException`.
+- `PromotionService::createPromotion()` validates the promotion domain invariants and rejects duplicate coupon codes within the same store scope.
 
 ### Planned (Production Readiness Improvements)
-- **Domain Validation & Exceptions**: Introduce `InvalidPromotionException` and guard clauses for percentage bounds, negative amounts, and invalid date ranges.
 - **Priority Resolution**: Prioritize store-scoped coupons over platform-wide global coupons in `findByCode`.
 
 ---
