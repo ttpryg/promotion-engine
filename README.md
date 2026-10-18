@@ -58,6 +58,11 @@ CREATE TABLE IF NOT EXISTS promotion_usages (
     used_at DATETIME NOT NULL,
     FOREIGN KEY (promotion_id) REFERENCES promotions(id) ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS idx_promotions_code ON promotions(code);
+CREATE INDEX IF NOT EXISTS idx_promotions_store_active ON promotions(store_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_usages_promo_user ON promotion_usages(promotion_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_usages_order_id ON promotion_usages(order_id);
 ```
 
 ---

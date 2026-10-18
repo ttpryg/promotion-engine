@@ -14,13 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PromotionUsageLimitExceededException` thrown when a promotion's global usage limit is reached during usage recording.
 - `TransactionManagerInterface` with `PdoTransactionManager` (PDO-backed ACID transactions) and `NullTransactionManager` (no-op default) implementations.
 - Optional `$transactionManager` argument on the `PromotionService` constructor.
+- Database indexes in `database/schema.sql`: `idx_promotions_code`, `idx_promotions_store_active` (store lookup), `idx_usages_promo_user` (per-user usage counting), and `idx_usages_order_id`.
 
 ### Changed
 - `PromotionService::recordPromotionUsage()` now uses the atomic `incrementUsageCount()` instead of a read-modify-write cycle, preventing race conditions and overselling during simultaneous checkouts.
 - `PromotionService::recordPromotionUsage()` wraps the usage counter increment and usage history insert in a single database transaction, rolling both back on failure; `PromotionUsedEvent` is dispatched only after a successful commit.
 
 ### Planned (Production Readiness Improvements)
-- **Database Indexing**: Add database indices on `promotions(code)`, `promotions(store_id, is_active)`, and composite index on `promotion_usages(promotion_id, user_id)`.
 - **Domain Validation & Exceptions**: Introduce `InvalidPromotionException` and guard clauses for percentage bounds, negative amounts, and invalid date ranges.
 - **Priority Resolution**: Prioritize store-scoped coupons over platform-wide global coupons in `findByCode`.
 
