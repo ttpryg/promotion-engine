@@ -4,6 +4,7 @@ namespace Ttpryg\PromotionEngine\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Ttpryg\PromotionEngine\Enums\PromotionType;
+use Ttpryg\PromotionEngine\Exceptions\PromotionUsageLimitExceededException;
 use Ttpryg\PromotionEngine\Repositories\MemoryPromotionRepository;
 use Ttpryg\PromotionEngine\Repositories\MemoryPromotionUsageRepository;
 use Ttpryg\PromotionEngine\Services\PromotionService;
@@ -72,5 +73,37 @@ class PromotionServiceTest extends TestCase
 
         $this->assertFalse($discountResult->isEligible);
         $this->assertStringContainsString('limit reached', strtolower($discountResult->reason));
+    }
+
+    public function test_record_usage_throws_when_global_limit_exceeded(): void
+    {
+        $this->promotionService->createPromotion(
+            id: 'p3',
+            name: 'Kupon Global 1x',
+            type: PromotionType::FIXED_AMOUNT,
+            value: 5000.0,
+            code: 'GLOBAL1',
+            usageLimit: 1
+        );
+
+        $this->promotionService->recordPromotionUsage(
+            usageId: 'u3-1',
+            promotionId: 'p3',
+            userId: 'user-1',
+            discountAmount: 5000.0
+        );
+
+        $this->expectException(PromotionUsageLimitExceededException::class);
+
+        try {
+            $this->promotionService->recordPromotionUsage(
+                usageId: 'u3-2',
+                promotionId: 'p3',
+                userId: 'user-2',
+                discountAmount: 5000.0
+            );
+        } finally {
+            $this->assertSame(1, $this->memoryPromotionRepository->findById('p3')?->usageCount);
+        }
     }
 }

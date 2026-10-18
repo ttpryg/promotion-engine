@@ -51,4 +51,50 @@ class PdoPromotionRepositoryTest extends TestCase
         $this->assertEquals(20.0, $fetched->value);
         $this->assertEquals('store-abc', $fetched->storeId);
     }
+
+    public function test_increment_usage_count_respects_global_limit(): void
+    {
+        $promotion = new Promotion(
+            id: 'promo-limit-1',
+            code: 'LIMITED',
+            name: 'Kupon Terbatas',
+            description: null,
+            type: PromotionType::FIXED_AMOUNT,
+            value: 10000.0,
+            usageLimit: 2
+        );
+
+        $this->pdoPromotionRepository->save($promotion);
+
+        $this->assertTrue($this->pdoPromotionRepository->incrementUsageCount('promo-limit-1'));
+        $this->assertTrue($this->pdoPromotionRepository->incrementUsageCount('promo-limit-1'));
+        $this->assertFalse($this->pdoPromotionRepository->incrementUsageCount('promo-limit-1'));
+
+        $this->assertSame(2, $this->pdoPromotionRepository->findById('promo-limit-1')?->usageCount);
+    }
+
+    public function test_increment_usage_count_returns_false_for_unknown_promotion(): void
+    {
+        $this->assertFalse($this->pdoPromotionRepository->incrementUsageCount('missing-promo'));
+    }
+
+    public function test_increment_usage_count_without_limit_is_unbounded(): void
+    {
+        $promotion = new Promotion(
+            id: 'promo-unlimited',
+            code: 'UNLIMITED',
+            name: 'Kupon Tanpa Batas',
+            description: null,
+            type: PromotionType::FIXED_AMOUNT,
+            value: 10000.0
+        );
+
+        $this->pdoPromotionRepository->save($promotion);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->assertTrue($this->pdoPromotionRepository->incrementUsageCount('promo-unlimited'));
+        }
+
+        $this->assertSame(5, $this->pdoPromotionRepository->findById('promo-unlimited')?->usageCount);
+    }
 }

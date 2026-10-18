@@ -15,6 +15,7 @@ use Ttpryg\PromotionEngine\Evaluators\DefaultPromotionEvaluator;
 use Ttpryg\PromotionEngine\Events\PromotionAppliedEvent;
 use Ttpryg\PromotionEngine\Events\PromotionCreatedEvent;
 use Ttpryg\PromotionEngine\Events\PromotionUsedEvent;
+use Ttpryg\PromotionEngine\Exceptions\PromotionUsageLimitExceededException;
 
 class PromotionService
 {
@@ -127,10 +128,8 @@ class PromotionService
         ?string $cartId = null,
         ?string $orderId = null
     ): PromotionUsage {
-        $promotion = $this->promotionRepository->findById($promotionId);
-        if ($promotion instanceof \Ttpryg\PromotionEngine\Entities\Promotion) {
-            $promotion->incrementUsage();
-            $this->promotionRepository->save($promotion);
+        if (! $this->promotionRepository->incrementUsageCount($promotionId)) {
+            throw new PromotionUsageLimitExceededException($promotionId);
         }
 
         $promotionUsage = new PromotionUsage(

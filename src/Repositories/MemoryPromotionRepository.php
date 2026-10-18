@@ -2,6 +2,7 @@
 
 namespace Ttpryg\PromotionEngine\Repositories;
 
+use DateTimeImmutable;
 use Ttpryg\PromotionEngine\Contracts\PromotionRepositoryInterface;
 use Ttpryg\PromotionEngine\Entities\Promotion;
 
@@ -13,6 +14,19 @@ class MemoryPromotionRepository implements PromotionRepositoryInterface
     public function save(Promotion $promotion): void
     {
         $this->promotions[$promotion->id] = $promotion;
+    }
+
+    public function incrementUsageCount(string $id, ?DateTimeImmutable $now = null): bool
+    {
+        $promotion = $this->promotions[$id] ?? null;
+
+        if (! $promotion instanceof Promotion || $promotion->hasReachedGlobalUsageLimit()) {
+            return false;
+        }
+
+        $promotion->incrementUsage();
+
+        return true;
     }
 
     public function findById(string $id): ?Promotion

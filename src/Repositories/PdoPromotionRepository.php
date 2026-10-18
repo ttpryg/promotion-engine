@@ -43,6 +43,21 @@ class PdoPromotionRepository implements PromotionRepositoryInterface
         ]);
     }
 
+    public function incrementUsageCount(string $id, ?DateTimeImmutable $now = null): bool
+    {
+        $now ??= new DateTimeImmutable;
+
+        $stmt = $this->pdo->prepare(
+            'UPDATE promotions SET usage_count = usage_count + 1, updated_at = :updated_at WHERE id = :id AND (usage_limit IS NULL OR usage_count < usage_limit)'
+        );
+        $stmt->execute([
+            'id' => $id,
+            'updated_at' => $now->format('Y-m-d H:i:s'),
+        ]);
+
+        return $stmt->rowCount() > 0;
+    }
+
     public function findById(string $id): ?Promotion
     {
         $stmt = $this->pdo->prepare('SELECT * FROM promotions WHERE id = :id');
