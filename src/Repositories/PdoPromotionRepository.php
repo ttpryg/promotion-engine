@@ -74,8 +74,12 @@ class PdoPromotionRepository implements PromotionRepositoryInterface
 
         if ($storeId !== null) {
             $sql .= ' AND (store_id IS NULL OR store_id = :store_id)';
+            $sql .= ' ORDER BY (CASE WHEN store_id = :store_id_priority THEN 0 ELSE 1 END) ASC';
             $params['store_id'] = $storeId;
+            $params['store_id_priority'] = $storeId;
         }
+
+        $sql .= ' LIMIT 1';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);

@@ -75,6 +75,43 @@ class PromotionServiceTest extends TestCase
         $this->assertStringContainsString('limit reached', strtolower($discountResult->reason));
     }
 
+    public function test_store_scoped_coupon_takes_priority_over_global(): void
+    {
+        // Global is registered first to prove insertion order does not matter.
+        $this->promotionService->createPromotion(
+            id: 'g1',
+            name: 'Global 10%',
+            type: PromotionType::PERCENTAGE,
+            value: 10.0,
+            code: 'PRIO'
+        );
+
+        $this->promotionService->createPromotion(
+            id: 's1',
+            name: 'Store 20%',
+            type: PromotionType::PERCENTAGE,
+            value: 20.0,
+            code: 'PRIO',
+            storeId: 'store-1'
+        );
+
+        $storeResult = $this->promotionService->evaluateCoupon('PRIO', [
+            'cart_subtotal' => 100000.0,
+            'store_id' => 'store-1',
+        ]);
+
+        $this->assertTrue($storeResult->isEligible);
+        $this->assertEquals(20000.0, $storeResult->discountAmount);
+
+        $globalResult = $this->promotionService->evaluateCoupon('PRIO', [
+            'cart_subtotal' => 100000.0,
+            'store_id' => 'store-2',
+        ]);
+
+        $this->assertTrue($globalResult->isEligible);
+        $this->assertEquals(10000.0, $globalResult->discountAmount);
+    }
+
     public function test_record_usage_throws_when_global_limit_exceeded(): void
     {
         $this->promotionService->createPromotion(

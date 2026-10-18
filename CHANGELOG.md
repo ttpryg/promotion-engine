@@ -24,9 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PromotionService::recordPromotionUsage()` wraps the usage counter increment and usage history insert in a single database transaction, rolling both back on failure; `PromotionUsedEvent` is dispatched only after a successful commit.
 - `PromotionService::recordPromotionUsage()` now throws `PromotionNotFoundException` when the promotion does not exist, distinct from `PromotionUsageLimitExceededException`.
 - `PromotionService::createPromotion()` validates the promotion domain invariants and rejects duplicate coupon codes within the same store scope.
-
-### Planned (Production Readiness Improvements)
-- **Priority Resolution**: Prioritize store-scoped coupons over platform-wide global coupons in `findByCode`.
+- `findByCode()` now deterministically prioritizes store-scoped coupons over platform-wide global coupons when both share the same code (applied to both PDO and in-memory repositories).
 
 ---
 
