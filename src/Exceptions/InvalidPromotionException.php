@@ -6,7 +6,7 @@ namespace Ttpryg\PromotionEngine\Exceptions;
 
 use InvalidArgumentException;
 
-class InvalidPromotionException extends InvalidArgumentException
+class InvalidPromotionException extends InvalidArgumentException implements ExceptionInterface
 {
     public static function percentageOutOfRange(float $value): self
     {

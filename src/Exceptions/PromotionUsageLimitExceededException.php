@@ -6,7 +6,7 @@ namespace Ttpryg\PromotionEngine\Exceptions;
 
 use RuntimeException;
 
-class PromotionUsageLimitExceededException extends RuntimeException
+class PromotionUsageLimitExceededException extends RuntimeException implements ExceptionInterface
 {
     public function __construct(
         public readonly string $promotionId,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\PromotionEngine\Repositories;
 
 use DateTimeImmutable;
@@ -76,6 +78,9 @@ class MemoryPromotionRepository implements PromotionRepositoryInterface
         return false;
     }
 
+    /**
+     * @return array<int, Promotion>
+     */
     public function findActivePromotions(?string $storeId = null): array
     {
         $result = [];

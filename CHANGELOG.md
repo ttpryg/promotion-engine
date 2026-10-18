@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+- Root marker interface `Ttpryg\PromotionEngine\Exceptions\ExceptionInterface` implemented by all custom exceptions.
+- `DatabaseMigrator` and `MigrationRunner` for bootstrapping fresh installs and applying tracked incremental migrations, plus `database/migrations/001_add_promotion_indexes.sql`.
+- PHPStan (`phpstan.neon`, level 8, `phpVersion: 80100`) with new `analyse` and `check` Composer scripts and a CI static-analysis step.
+- Test coverage for the exception hierarchy and `DatabaseMigrator`/`MigrationRunner`.
+
+### Changed
+- `declare(strict_types=1);` is now present in every `src/` file.
+- Non-nullable `createdAt`/`updatedAt` (`Promotion`) and `usedAt` (`PromotionUsage`) properties for static-analysis correctness.
+- CI matrix expanded to PHP 8.1–8.4.
+- README now documents requirements, the PHP compatibility table, versioned migrations, and error handling via `ExceptionInterface`.
+
+---
+
 ## [1.1.0] - 2026-10-18
 
 ### Added

@@ -7,7 +7,7 @@ namespace Ttpryg\PromotionEngine\Exceptions;
 use RuntimeException;
 use Throwable;
 
-class PromotionNotFoundException extends RuntimeException
+class PromotionNotFoundException extends RuntimeException implements ExceptionInterface
 {
     public function __construct(
         public readonly string $promotionId,

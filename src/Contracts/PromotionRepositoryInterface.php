@@ -31,6 +31,9 @@ interface PromotionRepositoryInterface
      */
     public function codeExists(string $code, ?string $storeId = null, ?string $excludeId = null): bool;
 
+    /**
+     * @return array<int, Promotion>
+     */
     public function findActivePromotions(?string $storeId = null): array;
 
     public function delete(string $id): bool;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\PromotionEngine\Services;
 
 use DateTimeImmutable;
@@ -82,6 +84,9 @@ class PromotionService
         return $promotion;
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public function evaluateCoupon(string $code, array $context): DiscountResult
     {
         $storeId = $context['store_id'] ?? null;
@@ -104,6 +109,9 @@ class PromotionService
         return $discountResult;
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public function findBestAutomaticPromotion(array $context): ?DiscountResult
     {
         $storeId = $context['store_id'] ?? null;

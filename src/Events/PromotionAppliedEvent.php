@@ -9,6 +9,9 @@ use Ttpryg\PromotionEngine\Entities\Promotion;
 
 class PromotionAppliedEvent
 {
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public function __construct(
         public readonly Promotion $promotion,
         public readonly DiscountResult $result,

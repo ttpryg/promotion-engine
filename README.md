@@ -2,6 +2,25 @@
 
 `ttpryg/promotion-engine` is a framework-agnostic standalone PHP 8.1+ library for promotion, coupon code evaluation, automatic storewide discounts, and multi-store promo management.
 
+## 📋 Requirements
+
+- PHP `>= 8.1`
+- `ext-pdo` — only required when using the PDO storage drivers
+- A PSR-14 event dispatcher — optional, e.g. `ttpryg/event-dispatcher`
+
+| PHP Version | Supported |
+|-------------|-----------|
+| 8.1         | ✅        |
+| 8.2         | ✅        |
+| 8.3         | ✅        |
+| 8.4         | ✅        |
+
+## 📦 Installation
+
+```bash
+composer require ttpryg/promotion-engine
+```
+
 ## 🌟 Key Features
 
 - **Framework Agnostic**: Works out of the box with any PHP 8.1+ application or framework (Vanilla PHP, Slim 4, Laravel, Symfony, CodeIgniter).
@@ -19,7 +38,9 @@
 - **Multiple Storage Drivers**:
   - `PdoPromotionRepository` & `PdoPromotionUsageRepository`: Relational database storage via PDO (MariaDB, MySQL, SQLite).
   - `MemoryPromotionRepository` & `MemoryPromotionUsageRepository`: In-memory storage for unit testing.
-- **Domain Validation & Exceptions**: Guard clauses for percentage bounds (`0.01`–`100.00`), non-negative amounts, valid date ranges, and per-store unique coupon codes, throwing `InvalidPromotionException`, `PromotionNotFoundException`, and `PromotionUsageLimitExceededException`.
+- **Domain Validation & Exceptions**: Guard clauses for percentage bounds (`0.01`–`100.00`), non-negative amounts, valid date ranges, and per-store unique coupon codes, throwing `InvalidPromotionException`, `PromotionNotFoundException`, and `PromotionUsageLimitExceededException` — all catchable via the root marker interface `ExceptionInterface`.
+- **Safe Usage Recording**: Atomic, limit-guarded `usage_count` increments wrapped in a database transaction to prevent overselling under concurrent checkouts.
+- **Versioned Schema Migrations**: `DatabaseMigrator` bootstraps fresh installs from `database/schema.sql`, while `MigrationRunner` applies incremental `database/migrations/*.sql` changes exactly once for existing databases.
 - **Domain Events**: Dispatches PSR-14 events (`PromotionCreatedEvent`, `PromotionAppliedEvent`, `PromotionUsedEvent`).
 
 ---
@@ -66,6 +87,30 @@ CREATE INDEX IF NOT EXISTS idx_promotions_store_active ON promotions(store_id, i
 CREATE INDEX IF NOT EXISTS idx_usages_promo_user ON promotion_usages(promotion_id, user_id);
 CREATE INDEX IF NOT EXISTS idx_usages_order_id ON promotion_usages(order_id);
 ```
+
+### Versioned Migrations
+
+`database/schema.sql` bootstraps fresh installs (every statement uses `CREATE TABLE/INDEX IF NOT EXISTS`, so re-running never touches existing data). For databases that already exist, the bundled migrator applies incremental SQL changes from `database/migrations/*.sql` exactly once, tracked in the `promotion_engine_migrations` table:
+
+**Fresh install** — creates the full schema from `database/schema.sql`, then records every bundled migration as a baseline (never re-executed):
+
+```php
+use Ttpryg\PromotionEngine\Database\DatabaseMigrator;
+
+(new DatabaseMigrator($pdo))->migrate();
+```
+
+**Existing database** — run pending migrations; each file executes once in name order, is recorded in the tracker only after success, and is automatically retried on the next run if it fails:
+
+```php
+use Ttpryg\PromotionEngine\Database\MigrationRunner;
+
+$runner = new MigrationRunner($pdo);
+$runner->migrate();            // e.g. ['001_add_promotion_indexes']
+$runner->appliedMigrations();  // full applied history
+```
+
+> Migration `001_add_promotion_indexes` upgrades databases created before the performance indexes existed. Fresh installs skip it automatically (baseline). MySQL DDL auto-commits, so keep migration files idempotent where possible.
 
 ---
 
@@ -122,6 +167,31 @@ $service->recordPromotionUsage(
     discountAmount: $result->discountAmount,
     orderId: 'order-888'
 );
+```
+
+---
+
+## 🛡️ Error Handling
+
+Every custom exception implements the root marker interface
+`Ttpryg\PromotionEngine\Exceptions\ExceptionInterface`, so all library errors can
+be handled with a single catch block:
+
+```php
+use Ttpryg\PromotionEngine\Exceptions\ExceptionInterface;
+
+try {
+    $service->recordPromotionUsage(
+        usageId: 'usage-999',
+        promotionId: $promotion->id,
+        userId: 'user-777',
+        discountAmount: $result->discountAmount
+    );
+} catch (ExceptionInterface $exception) {
+    // InvalidPromotionException | PromotionNotFoundException
+    // | PromotionUsageLimitExceededException
+    error_log($exception->getMessage());
+}
 ```
 
 ---
