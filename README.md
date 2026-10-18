@@ -70,13 +70,15 @@ use Ttpryg\PromotionEngine\Enums\PromotionType;
 use Ttpryg\PromotionEngine\Repositories\PdoPromotionRepository;
 use Ttpryg\PromotionEngine\Repositories\PdoPromotionUsageRepository;
 use Ttpryg\PromotionEngine\Services\PromotionService;
+use Ttpryg\PromotionEngine\Transactions\PdoTransactionManager;
 
 // 1. Initialize Database & Repositories
 $pdo = new PDO("mysql:host=localhost;dbname=my_db", "root", "secret");
 $promotionRepo = new PdoPromotionRepository($pdo);
 $usageRepo = new PdoPromotionUsageRepository($pdo);
+$transactionManager = new PdoTransactionManager($pdo);
 
-$service = new PromotionService($promotionRepo, $usageRepo);
+$service = new PromotionService($promotionRepo, $usageRepo, transactionManager: $transactionManager);
 
 // 2. Create a Coupon Promotion
 $promotion = $service->createPromotion(

@@ -7,6 +7,7 @@ use Ttpryg\EventDispatcher\Contracts\EventDispatcherInterface;
 use Ttpryg\PromotionEngine\Contracts\PromotionEvaluatorInterface;
 use Ttpryg\PromotionEngine\Contracts\PromotionRepositoryInterface;
 use Ttpryg\PromotionEngine\Contracts\PromotionUsageRepositoryInterface;
+use Ttpryg\PromotionEngine\Contracts\TransactionManagerInterface;
 use Ttpryg\PromotionEngine\DTO\DiscountResult;
 use Ttpryg\PromotionEngine\Entities\Promotion;
 use Ttpryg\PromotionEngine\Entities\PromotionUsage;
@@ -16,18 +17,23 @@ use Ttpryg\PromotionEngine\Events\PromotionAppliedEvent;
 use Ttpryg\PromotionEngine\Events\PromotionCreatedEvent;
 use Ttpryg\PromotionEngine\Events\PromotionUsedEvent;
 use Ttpryg\PromotionEngine\Exceptions\PromotionUsageLimitExceededException;
+use Ttpryg\PromotionEngine\Transactions\NullTransactionManager;
 
 class PromotionService
 {
     private readonly PromotionEvaluatorInterface $promotionEvaluator;
 
+    private readonly TransactionManagerInterface $transactionManager;
+
     public function __construct(
         private readonly PromotionRepositoryInterface $promotionRepository,
         private readonly PromotionUsageRepositoryInterface $promotionUsageRepository,
         ?PromotionEvaluatorInterface $promotionEvaluator = null,
-        private readonly ?EventDispatcherInterface $eventDispatcher = null
+        private readonly ?EventDispatcherInterface $eventDispatcher = null,
+        ?TransactionManagerInterface $transactionManager = null
     ) {
         $this->promotionEvaluator = $promotionEvaluator ?? new DefaultPromotionEvaluator;
+        $this->transactionManager = $transactionManager ?? new NullTransactionManager;
     }
 
     public function createPromotion(
@@ -128,10 +134,6 @@ class PromotionService
         ?string $cartId = null,
         ?string $orderId = null
     ): PromotionUsage {
-        if (! $this->promotionRepository->incrementUsageCount($promotionId)) {
-            throw new PromotionUsageLimitExceededException($promotionId);
-        }
-
         $promotionUsage = new PromotionUsage(
             id: $usageId,
             promotionId: $promotionId,
@@ -141,7 +143,14 @@ class PromotionService
             orderId: $orderId
         );
 
-        $this->promotionUsageRepository->recordUsage($promotionUsage);
+        $this->transactionManager->transactional(function () use ($promotionId, $promotionUsage): void {
+            if (! $this->promotionRepository->incrementUsageCount($promotionId)) {
+                throw new PromotionUsageLimitExceededException($promotionId);
+            }
+
+            $this->promotionUsageRepository->recordUsage($promotionUsage);
+        });
+
         $this->eventDispatcher?->dispatch(new PromotionUsedEvent($promotionUsage));
 
         return $promotionUsage;
