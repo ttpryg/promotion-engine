@@ -50,7 +50,7 @@ class DefaultPromotionEvaluator implements PromotionEvaluatorInterface
         }
 
         return DiscountResult::eligible(
-            discountAmount: $discount,
+            discountAmount: round($discount, 2),
             promotionId: $promotion->id,
             code: $promotion->code
         );

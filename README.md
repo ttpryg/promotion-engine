@@ -10,6 +10,7 @@
   - `FIXED_AMOUNT`: Fixed currency discount (e.g. Rp 50.000 off).
   - `PERCENTAGE`: Percentage discount (e.g. 20% off) with maximum cap limit (`max_discount`).
 - **Multi-Tenant / Multi-Store Scoping**: Filter promotions by `store_id` and `owner_id` for multi-store marketplaces, with deterministic priority for store-scoped coupons over global ones sharing the same code.
+- **Financial Precision**: Discount amounts are always rounded to two decimals to avoid floating-point drift in money calculations.
 - **Usage & Eligibility Limits**:
   - Minimum spend thresholds (`min_spend`).
   - Active date range windows (`start_at`, `end_at`).
