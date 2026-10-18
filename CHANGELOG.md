@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Domain exceptions: `InvalidPromotionException` and `PromotionNotFoundException`.
 - `PromotionRepositoryInterface::codeExists()` for per-store coupon code uniqueness checks.
 - `Promotion::validate()` domain guard clauses for percentage bounds, non-negative amounts, valid date ranges, and non-empty coupon codes.
+- Test coverage for `findBestAutomaticPromotion()`, domain input validation, atomic usage-limit/overselling, store-vs-global coupon priority, and `PdoPromotionUsageRepository` (SQLite in-memory integration).
 
 ### Changed
 - `PromotionService::recordPromotionUsage()` now uses the atomic `incrementUsageCount()` instead of a read-modify-write cycle, preventing race conditions and overselling during simultaneous checkouts.
