@@ -18,6 +18,7 @@
 - **Multiple Storage Drivers**:
   - `PdoPromotionRepository` & `PdoPromotionUsageRepository`: Relational database storage via PDO (MariaDB, MySQL, SQLite).
   - `MemoryPromotionRepository` & `MemoryPromotionUsageRepository`: In-memory storage for unit testing.
+- **Domain Validation & Exceptions**: Guard clauses for percentage bounds (`0.01`–`100.00`), non-negative amounts, valid date ranges, and per-store unique coupon codes, throwing `InvalidPromotionException`, `PromotionNotFoundException`, and `PromotionUsageLimitExceededException`.
 - **Domain Events**: Dispatches PSR-14 events (`PromotionCreatedEvent`, `PromotionAppliedEvent`, `PromotionUsedEvent`).
 
 ---

@@ -24,6 +24,13 @@ interface PromotionRepositoryInterface
 
     public function findByCode(string $code, ?string $storeId = null): ?Promotion;
 
+    /**
+     * Determine whether a coupon code already exists within the exact same
+     * store scope (case-insensitive). A null store scope represents a
+     * platform-wide/global coupon.
+     */
+    public function codeExists(string $code, ?string $storeId = null, ?string $excludeId = null): bool;
+
     public function findActivePromotions(?string $storeId = null): array;
 
     public function delete(string $id): bool;

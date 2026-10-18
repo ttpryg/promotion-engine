@@ -16,6 +16,8 @@ use Ttpryg\PromotionEngine\Evaluators\DefaultPromotionEvaluator;
 use Ttpryg\PromotionEngine\Events\PromotionAppliedEvent;
 use Ttpryg\PromotionEngine\Events\PromotionCreatedEvent;
 use Ttpryg\PromotionEngine\Events\PromotionUsedEvent;
+use Ttpryg\PromotionEngine\Exceptions\InvalidPromotionException;
+use Ttpryg\PromotionEngine\Exceptions\PromotionNotFoundException;
 use Ttpryg\PromotionEngine\Exceptions\PromotionUsageLimitExceededException;
 use Ttpryg\PromotionEngine\Transactions\NullTransactionManager;
 
@@ -68,6 +70,11 @@ class PromotionService
             startAt: $startAt,
             endAt: $endAt
         );
+
+        if ($promotion->code !== null
+            && $this->promotionRepository->codeExists($promotion->code, $promotion->storeId)) {
+            throw InvalidPromotionException::duplicateCode($promotion->code, $promotion->storeId);
+        }
 
         $this->promotionRepository->save($promotion);
         $this->eventDispatcher?->dispatch(new PromotionCreatedEvent($promotion));
@@ -145,6 +152,10 @@ class PromotionService
 
         $this->transactionManager->transactional(function () use ($promotionId, $promotionUsage): void {
             if (! $this->promotionRepository->incrementUsageCount($promotionId)) {
+                if (! $this->promotionRepository->findById($promotionId) instanceof Promotion) {
+                    throw new PromotionNotFoundException($promotionId);
+                }
+
                 throw new PromotionUsageLimitExceededException($promotionId);
             }
 

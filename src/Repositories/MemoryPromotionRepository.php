@@ -47,6 +47,23 @@ class MemoryPromotionRepository implements PromotionRepositoryInterface
         return null;
     }
 
+    public function codeExists(string $code, ?string $storeId = null, ?string $excludeId = null): bool
+    {
+        foreach ($this->promotions as $promotion) {
+            if ($promotion->id === $excludeId) {
+                continue;
+            }
+
+            if ($promotion->code !== null
+                && strcasecmp($promotion->code, $code) === 0
+                && $promotion->storeId === $storeId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function findActivePromotions(?string $storeId = null): array
     {
         $result = [];

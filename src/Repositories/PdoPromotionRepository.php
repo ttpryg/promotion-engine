@@ -84,6 +84,29 @@ class PdoPromotionRepository implements PromotionRepositoryInterface
         return $row ? $this->mapToEntity($row) : null;
     }
 
+    public function codeExists(string $code, ?string $storeId = null, ?string $excludeId = null): bool
+    {
+        $sql = 'SELECT COUNT(*) FROM promotions WHERE LOWER(code) = LOWER(:code)';
+        $params = ['code' => $code];
+
+        if ($storeId === null) {
+            $sql .= ' AND store_id IS NULL';
+        } else {
+            $sql .= ' AND store_id = :store_id';
+            $params['store_id'] = $storeId;
+        }
+
+        if ($excludeId !== null) {
+            $sql .= ' AND id <> :exclude_id';
+            $params['exclude_id'] = $excludeId;
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public function findActivePromotions(?string $storeId = null): array
     {
         $sql = 'SELECT * FROM promotions WHERE is_active = 1';
